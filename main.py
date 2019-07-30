@@ -24,6 +24,16 @@ LOCAL_PATH = '../video/CCTV_News.mp4'
 vdfilteror = None
 
 
+def watch_dog():
+    global vdfilteror
+    while True:
+        if isinstance(vdfilteror, Vdfilter):
+            while vdfilteror.is_alive():
+                time.sleep(10)
+            time.sleep(5)
+            vdfilteror = None
+
+
 class Vdfilter:
     def __init__(self, config):
         self.vd_mode = config['video_mode']  # local/live
@@ -148,7 +158,7 @@ def vdpreview():
     if not os.path.exists(picdir):
         os.mkdir(picdir)
     dirfilepaths = []
-    dirfilepaths = get_filelist(os.path.join(os.getcwd(), video_path), dirfilepaths, _ignoredir='thumbpic')
+    dirfilepaths = get_filelist(os.path.join(os.getcwd(), video_path), dirfilepaths, ignoredir_='thumbpic')
     for filepath in dirfilepaths:
         hfilename = (os.path.split(filepath)[-1]).split(".")[0]
         picfilename = os.path.join(picdir, hfilename + str('.jpg'))
@@ -227,6 +237,8 @@ if __name__ == "__main__":
     port = 9999
     vdsource = multiprocessing.Process(target=node_start)
     vdsource.start()
+    wcdog = threading.Thread(target=watch_dog)
+    wcdog.start()
     app.run(host="0.0.0.0", port=port, debug=True)
     print("Flask have started! Listening on 0.0.0.0:%d !" % port)
 

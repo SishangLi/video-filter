@@ -370,7 +370,7 @@ class AutoFilter(FetchStream):
                 print('Too few buffer files, downloading ...')
             dynamicplaylist = m3u8.load(self.m3u8path) if self.vdmode == 'local' else m3u8.load(self.url)
             for filename in dynamicplaylist.files:
-                filename = filename if self.vdmode == 'local' else filename.split('/')[3]
+                filename = filename if self.vdmode == 'local' else filename.split('/')[-1]
                 if filename not in self.filedset and not self.global_ternimal_single:
                     self.filedset.add(filename)
                     self.filter_save(filename)

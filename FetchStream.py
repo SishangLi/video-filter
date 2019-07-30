@@ -44,7 +44,7 @@ class FetchStream(CutVideo):
             dynamicplaylist = m3u8.load(self.url)
             for videosegment in dynamicplaylist.segments:
                 videouri = videosegment.absolute_uri
-                videofname = videosegment.uri.split('/')[3]
+                videofname = videosegment.uri.split('/')[-1]
                 if videofname not in self.dlset:
                     self.dlset.add(videofname)
                     self.dlpool.submit(self.download_file, videouri, self.source_dir, videofname)
@@ -58,7 +58,7 @@ class FetchStream(CutVideo):
 
 
 if __name__ == "__main__":
-    fetcher = FetchStream('cctv1hd', 'None', 'http://tv6.ustc.edu.cn/hls/cctv1hd.m3u8', 'live')
+    fetcher = FetchStream('cctv1hd', 'None', 'http://ivi.bupt.edu.cn/hls/cctv13.m3u8', 'live')
     fetcher.fetch()
 
 
