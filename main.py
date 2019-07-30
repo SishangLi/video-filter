@@ -20,7 +20,7 @@ from flask import json, jsonify, make_response
 
 OUTPATH = 'None'
 URL = 'http://tv6.ustc.edu.cn/hls/jlu_cctv13.m3u8'
-LOCAL_PATH = '../video/CCTV_News.mp4'
+LOCAL_PATH = './video/CCTV_News.mp4'
 vdfilteror = None
 
 
