@@ -16,7 +16,7 @@ from utils.utils import *
 from Stream import Stream
 from easydict import EasyDict as edict
 from flask import Flask, request, send_from_directory
-from flask import Response, json, jsonify, make_response
+from flask import json, jsonify, make_response
 
 OUTPATH = 'None'
 URL = 'http://tv6.ustc.edu.cn/hls/jlu_cctv13.m3u8'
