@@ -53,8 +53,8 @@ class FetchStream(CutVideo):
         else:
             self.global_ternimal_carry[0] = True
             while True:
-                print("---------Fetch capture the ternimal signal and wait for be terminated ...-------------")
-                time.sleep(0.001)
+                print("-----Fetch capture the ternimal signal and wait for be terminated ...-------")
+                time.sleep(0.01)
 
 
 if __name__ == "__main__":

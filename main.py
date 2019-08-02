@@ -28,10 +28,11 @@ def watch_dog():
     global vdfilteror
     while True:
         if isinstance(vdfilteror, Vdfilter):
-            while vdfilteror.is_alive():
+            if not vdfilteror.newfilter.global_finish:
+                time.sleep(5)
+            else:
                 time.sleep(10)
-            time.sleep(5)
-            vdfilteror = None
+                vdfilteror = None
 
 
 class Vdfilter:
@@ -44,9 +45,9 @@ class Vdfilter:
             self.key_fcs[key] = np.array(eval(config['key_faces'][key]), dtype=np.uint8)
         self.out_path = 'None'
         self.message = []
-        if not os.path.exists(os.path.join(os.getcwd(), self.vd_ad)):
+        if self.vd_mode == 'local' and not os.path.exists(os.path.join(os.getcwd(), self.vd_ad)):
             print("%s is invalid !" % os.path.join(os.getcwd(), self.vd_ad))
-            self.message.append('Path is invalid !')
+            self.message.append(self.chencode('无效的视频路径！！！'))
         self.channel = (self.vd_ad.split('/')[-1])[:-5] if self.vd_mode == 'live' else \
             (os.path.split(self.vd_ad)[-1]).split(".")[0]
         self.pushadress = os.path.join("http://114.213.210.211:8000/", self.vd_mode, self.channel + '.flv')
@@ -145,6 +146,10 @@ class Vdfilter:
                 respose.headers["Live-address"] = str(vdfilteror.pushadress)
                 return respose
 
+    @staticmethod
+    def chencode(to_content):
+        return str(base64.b64encode(to_content.encode('utf-8')), 'utf-8')
+
 
 app = Flask(__name__)
 
@@ -157,25 +162,31 @@ def vdpreview():
     picdir = os.path.join(os.getcwd(), video_path, 'thumbpic')
     if not os.path.exists(picdir):
         os.mkdir(picdir)
-    dirfilepaths = []
-    dirfilepaths = get_filelist(os.path.join(os.getcwd(), video_path), dirfilepaths, ignoredir_='thumbpic')
+
+    dirfilepaths = os.listdir(os.path.join(os.getcwd(), video_path))
+    """The following code is used to send thumbnails"""
+    # dirfilepaths = []
+    # dirfilepaths = get_filelist(os.path.join(os.getcwd(), video_path), dirfilepaths, ignoredir_='thumbpic')
+    # for filepath in dirfilepaths:
+    #     hfilename = (os.path.split(filepath)[-1]).split(".")[0]
+    #     picfilename = os.path.join(picdir, hfilename + str('.jpg'))
+    #     if os.path.exists(picfilename):
+    #         pic_data = cv2.imread(picfilename)
+    #     else:
+    #         filepath = os.path.join(video_path, filepath)
+    #         cap = cv2.VideoCapture(filepath)
+    #         rval, pic_data = cap.read()
+    #         num = 30  # Read frame 30
+    #         while rval and num > 0:
+    #             _, pic_data = cap.read()
+    #             num -= 1
+    #         pic_data = cv2.resize(pic_data, (320, 240))
+    #         cv2.imwrite(picfilename, pic_data)
+    #         cap.release()
+    #     video_list[filepath] = str(pic_data.tolist())
     for filepath in dirfilepaths:
-        hfilename = (os.path.split(filepath)[-1]).split(".")[0]
-        picfilename = os.path.join(picdir, hfilename + str('.jpg'))
-        if os.path.exists(picfilename):
-            pic_data = cv2.imread(picfilename)
-        else:
-            filepath = os.path.join(video_path, filepath)
-            cap = cv2.VideoCapture(filepath)
-            rval, pic_data = cap.read()
-            num = 30  # Read frame 30
-            while rval and num > 0:
-                _, pic_data = cap.read()
-                num -= 1
-            pic_data = cv2.resize(pic_data, (320, 240))
-            cv2.imwrite(picfilename, pic_data)
-            cap.release()
-        video_list[filepath] = str(pic_data.tolist())
+        filepath = os.path.join(video_path, filepath)
+        video_list[filepath] = str(filepath)
     return jsonify({'video_path': video_path, 'video_list': video_list})
 
 
@@ -186,31 +197,35 @@ def vdfilter():
     if res['stop']:
         if not isinstance(vdfilteror, Vdfilter):
             return jsonify({'status': 'Failed',
-                            'message': 'Process have not be created,please create it before refresh！'})
+                            'message': vdfilteror.chencode('进程尚未创建，无需停止！！！')})
         else:
             if vdfilteror.stop():
                 vdfilteror = None
-                return jsonify({'status': 'Stop', 'message': 'Stop success!'})
+                return jsonify({'status': 'Stop', 'message': vdfilteror.chencode('停止成功！')})
             else:
                 vdfilteror = None
-                return jsonify({'status': 'Stop', 'message': 'Forced stop, Please check the background process !'})
+                return jsonify({'status': 'Stop',
+                                'message': vdfilteror.chencode('出现异常，已强行停止，可能存在残留进程！')})
     elif res['init']:
         if not isinstance(vdfilteror, Vdfilter):
             vdfilteror = Vdfilter(res)
             vdfilteror.start()
             if vdfilteror.is_alive():
-                return jsonify({'status': 'Initing', 'message': 'Start success'})
+                return jsonify({'status': 'Initing',
+                                'message': vdfilteror.chencode('启动成功,正在初始化 ... ')})
             else:
                 message = vdfilteror.message
                 vdfilteror.stop()
                 vdfilteror = None
-                return jsonify({'status': 'Failed', 'message': 'Initing fail,please retry !', 'details': message})
+                return jsonify({'status': 'Stop',
+                                'message': vdfilteror.chencode('启动失败，请重试或检查后台进程！' + message[0])})
         else:
-            return jsonify({'status': 'Loading', 'message': 'Process have created ! Don not recreate !'})
+            return jsonify({'status': 'Initing',
+                            'message': vdfilteror.chencode('进程已创建，请勿重复创建，正在运行！若要切换视频，请首先停止当前进程！')})
     else:
         if not isinstance(vdfilteror, Vdfilter):
             return jsonify({'status': 'Failed',
-                            'message': 'Process have not be created,please create it before refresh'})
+                            'message': vdfilteror.chencode('进程尚未创建，在刷新前请先创建进程！')})
         else:
             if vdfilteror.is_alive():
                 if vdfilteror.newfilter.streamcreater_start:
@@ -218,12 +233,15 @@ def vdfilter():
                     if resposedata is not None:
                         return resposedata
                     else:
-                        return jsonify({'status': 'Pushing', 'message': 'Have no new video chip has been cut!',
+                        return jsonify({'status': 'Pushing',
+                                        'message': vdfilteror.chencode('已开始推流，当前无最新的片段！！'),
                                         'Live address': str(vdfilteror.pushadress)})
                 else:
-                    return jsonify({'status': 'Loading', 'message': 'Initing success'})
+                    return jsonify({'status': 'Loading',
+                                    'message': vdfilteror.chencode('视频正在加载！！！')})
             else:
-                return jsonify({'status': 'Termination', 'message': 'Run error!'})
+                return jsonify({'status': 'Termination',
+                                'message': vdfilteror.chencode('运行出错，后台已停止运行！！！')})
 
 
 def node_start():

@@ -10,7 +10,7 @@ import subprocess
 import multiprocessing
 
 from utils.utils import *
-from CutVideo import CutVideo
+# from CutVideo import CutVideo
 from FetchStream import FetchStream
 
 from urllib.request import urlopen
@@ -278,9 +278,10 @@ class AutoSub(object):
 class AutoFilter(FetchStream):
     def __init__(self, channel, outpath, videopath, keywords, vdmode, faceimages):
         super(AutoFilter, self).__init__(channel, outpath, videopath, vdmode)
+        self.img_enlarge_times = 1 if self.vdmode == 'local' else 0
         self.keywords = keywords
         self.sub_creater = AutoSub()
-        self.face_recognizer = FR.Facedetection(faceimages)
+        self.face_recognizer = FR.Facedetection(faceimages, self.img_enlarge_times)
         self.filedset = set()
         self.history = {}
 
@@ -366,7 +367,7 @@ class AutoFilter(FetchStream):
                 time.sleep(2)
                 print("No m3u8 file was detected! Wating ... ...")
             while count_files(self.source_dir) < 2 and not self.global_ternimal_single:
-                time.sleep(2)
+                time.sleep(1)
                 print('Too few buffer files, downloading ...')
             dynamicplaylist = m3u8.load(self.m3u8path) if self.vdmode == 'local' else m3u8.load(self.url)
             for filename in dynamicplaylist.files:
@@ -382,11 +383,11 @@ class AutoFilter(FetchStream):
             if self.global_ternimal_single:
                 self.global_ternimal_carry[1] = True
                 while True:
-                    print("----------Sub capture the ternimal signal and wait for be terminated ...-----------")
-                    time.sleep(0.001)
+                    print("-Sub capture the ternimal signal and wait for be terminated ...-")
+                    time.sleep(0.01)
             else:
                 while not self.global_finish:
-                    print("--------------------Video filter has accomplished! Sleeping...---------------------")
+                    print("-----------Video filter has accomplished! Sleeping...------------")
                     time.sleep(1)
 
 

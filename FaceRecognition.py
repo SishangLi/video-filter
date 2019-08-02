@@ -13,6 +13,21 @@ shape_predictor = dlib.shape_predictor(currentpath + '/utils/models/shape_predic
 cascade = cv2.CascadeClassifier(currentpath + "/utils/models/haarcascade_frontalface_alt.xml")
 
 
+def total_time(func):
+    """
+    Calculate the running time of the function
+    :param func: the function need to been calculated
+    :return:
+    """
+    def call_fun(*args, **kwargs):
+        start_time = time.time()
+        f = func(*args, **kwargs)
+        end_time = time.time()
+        print('%s() run time：%s s' % (func.__name__, int(end_time - start_time)))
+        return f
+    return call_fun
+
+
 def extract_face_feature(imagename):
     """
     输入一张图片路径，返回此图片中人脸特征
@@ -42,21 +57,6 @@ def get_face_features(frame, faceposition):
     shape = shape_predictor(frame, faceposition)
     face_feature = face_rec_model.compute_face_descriptor(frame, shape)
     return face_feature
-
-
-def total_time(func):
-    """
-    Calculate the running time of the function
-    :param func: the function need to been calculated
-    :return:
-    """
-    def call_fun(*args, **kwargs):
-        start_time = time.time()
-        f = func(*args, **kwargs)
-        end_time = time.time()
-        print('%s() run time：%s s' % (func.__name__, int(end_time - start_time)))
-        return f
-    return call_fun
 
 
 def frame_time(time_ms):
@@ -101,9 +101,10 @@ class FaceChipInfo:
 
 
 class Facedetection(object):
-    def __init__(self, faceimages):
+    def __init__(self, faceimages, img_enlarge_times=0):
         self.current_time = 0
         self.frame_interval = 10
+        self.img_enlarge_times = img_enlarge_times
         self.feature = None
         self.keyname = []
         self.keyface_feature_create(faceimages)
@@ -130,11 +131,10 @@ class Facedetection(object):
         :param frame:视频中的一帧
         :return:
         """
-        _faces = detector(frame, 1)  # 使用detector检测器来检测图像中的人脸 ,1 表示将图片放大一倍
+        _faces = detector(frame, self.img_enlarge_times)  # 使用detector检测器来检测图像中的人脸 ,1 表示将图片放大一倍
         frameface_feature = np.zeros(shape=(128, len(_faces)))
         for i, face in enumerate(_faces):
             frameface_feature[:, i] = get_face_features(frame, face)
-
         if len(_faces):
             compare_result = np.zeros(shape=(len(self.keyname), len(_faces)))
             for i in range(len(self.keyname)):
@@ -193,7 +193,7 @@ if __name__ == '__main__':
     faces['李梓萌'] = cv2.imread('./utils/images/李梓萌.jpg')
     faces['康辉'] = cv2.imread('./utils/images/康辉.jpg')
     fd = Facedetection(faces)
-    result = fd.start('./utils/video/CCTV_News80_0.mp4')
+    result = fd.start('./utils/video/cctv1hd-1564737645000.ts')
     for k in result:
         print(k)
         print(result[k].time_show)

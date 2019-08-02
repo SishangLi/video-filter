@@ -23,24 +23,35 @@ class Stream(AutoFilter):
                    "-threads", "2", "-f", "flv", os.path.join("rtmp://114.213.210.211/", self.vdmode, self.channel)]
         self.streamcreater_start = True
         use_shell = True if os.name == "nt" else False
-        child = subprocess.Popen(command, stdin=subprocess.PIPE, shell=use_shell)
-        while child.poll() != 0 and not self.global_ternimal_single:
-            time.sleep(0.4)
+        childpush = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                     shell=use_shell)
+        while childpush.poll() != 0 and not self.global_ternimal_single:
+            time.sleep(0.5)
         else:
             if self.global_ternimal_single:
-                child.communicate('q'.encode())
+                childpush.communicate('q'.encode())
                 self.global_ternimal_carry[2] = True
                 while True:
-                    # print("---------Stream capture the ternimal signal and wait for be terminated ...----------")
-                    time.sleep(0.001)
-            else:
-                self.delay = 60
-                while self.delay:
+                    print("---------Stream capture the ternimal signal and wait for be terminated ...----------")
+                    time.sleep(0.01)
+            elif not self.cutvideo_finish:
+                while not self.global_ternimal_single:
+                    print('----------------Exception exit waiting for be terminated---------')
                     time.sleep(1)
-                    self.delay -= 1
+                else:
+                    if self.global_ternimal_single:
+                        self.global_ternimal_carry[2] = True
+                        while True:
+                            print("---------Stream capture the ternimal signal and wait for be terminated ...----------")
+                            time.sleep(0.01)
+            else:
+                waittime = 60
+                while waittime:
+                    time.sleep(1)
+                    waittime -= 1
                     print('----------------------Push accomplish, exit after one minute-------------------------')
                 self.global_finish = True
-                return
+                return True
 
     def push_live(self):
         print("Process push have start ...")
@@ -58,25 +69,31 @@ class Stream(AutoFilter):
                    "libx264", "-preset", "superfast", "-tune", "zerolatency", "-c:a", "aac", "-ar", "44100",
                    "-threads", "2", "-f", "flv", os.path.join("rtmp://114.213.210.211/", self.vdmode, self.channel)]
         self.streamcreater_start = True
+        # no_file_exit = False
         use_shell = True if os.name == "nt" else False
-        child = subprocess.Popen(command, stdin=subprocess.PIPE, shell=use_shell)
-        while child.poll() != 0 and not self.global_ternimal_single:
-            time.sleep(0.1)
+        childpushlive = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                         shell=use_shell)
+        while childpushlive.poll() != 0 and not self.global_ternimal_single:
+            time.sleep(0.5)
         else:
             if self.global_ternimal_single:
-                child.communicate('q'.encode())
+                childpushlive.communicate('q'.encode())
                 self.global_ternimal_carry[2] = True
                 while True:
                     print("---------Stream capture the ternimal signal and wait for be terminated ...----------")
-                    time.sleep(0.001)
+                    time.sleep(0.01)
             else:
-                self.delay = 60
-                while self.delay:
+                while not self.global_ternimal_single:
+                    print('----------------Exception exit waiting for be terminated---------')
                     time.sleep(1)
-                    self.delay -= 1
-                    print('----------------------Push accomplish, exit after one minute-------------------------')
-                self.global_finish = True
-                return
+                else:
+                    if self.global_ternimal_single:
+                        self.global_ternimal_carry[2] = True
+                        self.global_finish = True
+                        while True:
+                            print("---------Stream capture the ternimal signal and wait for be terminated ...----------")
+                            time.sleep(0.01)
+        return True
 
     def join(self):
         self.joindir = self.create_dir('-join')
@@ -116,6 +133,21 @@ if __name__ == "__main__":
     stream = Stream('cctv1hd', 'None', 'http://tv6.ustc.edu.cn/hls/cctv1hd.m3u8', '习近平', 'local', None)
     aa = threading.Thread(target=stream.filter_start)
     aa.start()
+    # history---------------------------------------------------------------------------1
+    # message = childpushlive.stdout.readlines()  # wait time
+    # if message[5].decode().find('list.txt') != -1 and \
+    #         message[5].decode().split(':')[1].find('No such file or directory') != -1:
+    #     no_file_exit = True
+    # if no_file_exit:
+    #     while not self.global_ternimal_single:
+    #         print('----------------Exception exit waiting for be terminated---------')
+    #         time.sleep(1)
+    #     else:
+    #         if self.global_ternimal_single:
+    #             self.global_ternimal_carry[2] = True
+    #             while True:
+    #                 print("---------Stream capture the ternimal signal and wait for be terminated ...----------")
+    #                 time.sleep(0.01)
 
 
 
