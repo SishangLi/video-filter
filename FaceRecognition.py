@@ -101,7 +101,7 @@ class FaceChipInfo:
 
 
 class Facedetection(object):
-    def __init__(self, faceimages, img_enlarge_times=0):
+    def __init__(self, faceimages, exit_signal, img_enlarge_times=0):
         self.current_time = 0
         self.frame_interval = 10
         self.img_enlarge_times = img_enlarge_times
@@ -110,6 +110,7 @@ class Facedetection(object):
         self.keyface_feature_create(faceimages)
         self.person_info = {}
         self.person_info_create()
+        self.exit_signal = exit_signal
 
     def person_info_create(self):
         for person in self.keyname:
@@ -174,6 +175,8 @@ class Facedetection(object):
         success, frame = cap.read()  # success：是否读取到帧 frame：截取到一帧图像，三维矩阵表示
         while success:
             self.current_time = frame_time(int(cap.get(0)))  # 获取当前播放帧在视频中的时间
+            if self.exit_signal[0]:
+                return []
             if frame_index % self.frame_interval == 0:  # 隔几帧取一次，加快执行速度
                 self.face_detected(frame)
             frame_index += 1

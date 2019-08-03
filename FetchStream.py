@@ -40,12 +40,12 @@ class FetchStream(CutVideo):
         it downloads them to the output directory as a TS video file."""
 
         print("Process fetch have start ...")
-        while not self.global_ternimal_single:
+        while not self.global_ternimal_single[0]:
             dynamicplaylist = m3u8.load(self.url)
             for videosegment in dynamicplaylist.segments:
                 videouri = videosegment.absolute_uri
                 videofname = videosegment.uri.split('/')[-1]
-                if videofname not in self.dlset:
+                if videofname not in self.dlset and not self.global_ternimal_single[0]:
                     self.dlset.add(videofname)
                     self.dlpool.submit(self.download_file, videouri, self.source_dir, videofname)
             # print("------------------------------fetch is alive------------------------------------------")

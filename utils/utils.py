@@ -12,7 +12,7 @@ class VideoFilter(object):
         self.autofilter_finish = False
         self.streamcreater_start = False
         self.global_finish = False
-        self.global_ternimal_single = False
+        self.global_ternimal_single = [False]
         self.global_ternimal_carry = [False, False, False]
         self.freq = 10
         self.delay = 10

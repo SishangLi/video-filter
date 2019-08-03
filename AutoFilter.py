@@ -281,7 +281,7 @@ class AutoFilter(FetchStream):
         self.img_enlarge_times = 1 if self.vdmode == 'local' else 0
         self.keywords = keywords
         self.sub_creater = AutoSub()
-        self.face_recognizer = FR.Facedetection(faceimages, self.img_enlarge_times)
+        self.face_recognizer = FR.Facedetection(faceimages, self.global_ternimal_single, self.img_enlarge_times)
         self.filedset = set()
         self.history = {}
 
@@ -362,17 +362,17 @@ class AutoFilter(FetchStream):
             time.sleep(1)
             wait -= 2
             print('Stream chips are initing, Filter waiting ... ...')
-        while not (self.global_ternimal_single or self.autofilter_finish):
+        while not (self.global_ternimal_single[0] or self.autofilter_finish):
             while self.vdmode == 'local' and not os.path.exists(self.m3u8path):
                 time.sleep(2)
                 print("No m3u8 file was detected! Wating ... ...")
-            while count_files(self.source_dir) < 2 and not self.global_ternimal_single:
+            while count_files(self.source_dir) < 2 and not self.global_ternimal_single[0]:
                 time.sleep(1)
                 print('Too few buffer files, downloading ...')
             dynamicplaylist = m3u8.load(self.m3u8path) if self.vdmode == 'local' else m3u8.load(self.url)
             for filename in dynamicplaylist.files:
                 filename = filename if self.vdmode == 'local' else filename.split('/')[-1]
-                if filename not in self.filedset and not self.global_ternimal_single:
+                if filename not in self.filedset and not self.global_ternimal_single[0]:
                     self.filedset.add(filename)
                     self.filter_save(filename)
             # print('------------------------------sub is alive------------------------------------------')
@@ -380,7 +380,7 @@ class AutoFilter(FetchStream):
             if dynamicplaylist.data['is_endlist'] and self.cutvideo_finish:
                 self.autofilter_finish = True
         else:
-            if self.global_ternimal_single:
+            if self.global_ternimal_single[0]:
                 self.global_ternimal_carry[1] = True
                 while True:
                     print("-Sub capture the ternimal signal and wait for be terminated ...-")

@@ -35,6 +35,10 @@ def watch_dog():
                 vdfilteror = None
 
 
+def chencode(to_content):
+    return str(base64.b64encode(to_content.encode('utf-8')), 'utf-8')
+
+
 class Vdfilter:
     def __init__(self, config):
         self.vd_mode = config['video_mode']  # local/live
@@ -47,7 +51,7 @@ class Vdfilter:
         self.message = []
         if self.vd_mode == 'local' and not os.path.exists(os.path.join(os.getcwd(), self.vd_ad)):
             print("%s is invalid !" % os.path.join(os.getcwd(), self.vd_ad))
-            self.message.append(self.chencode('无效的视频路径！！！'))
+            self.message.append(chencode('无效的视频路径！！！'))
         self.channel = (self.vd_ad.split('/')[-1])[:-5] if self.vd_mode == 'live' else \
             (os.path.split(self.vd_ad)[-1]).split(".")[0]
         self.pushadress = os.path.join("http://114.213.210.211:8000/", self.vd_mode, self.channel + '.flv')
@@ -90,7 +94,7 @@ class Vdfilter:
             raise SystemError("PyThreadState_SetAsyncExc failed")
 
     def stop(self):
-        self.newfilter.global_ternimal_single = True
+        self.newfilter.global_ternimal_single[0] = True
         while not (self.newfilter.global_ternimal_carry[0] and self.newfilter.global_ternimal_carry[1]
                    and self.newfilter.global_ternimal_carry[2]):
             time.sleep(0.01)
@@ -146,10 +150,6 @@ class Vdfilter:
                 respose.headers["Live-address"] = str(vdfilteror.pushadress)
                 return respose
 
-    @staticmethod
-    def chencode(to_content):
-        return str(base64.b64encode(to_content.encode('utf-8')), 'utf-8')
-
 
 app = Flask(__name__)
 
@@ -197,35 +197,35 @@ def vdfilter():
     if res['stop']:
         if not isinstance(vdfilteror, Vdfilter):
             return jsonify({'status': 'Failed',
-                            'message': vdfilteror.chencode('进程尚未创建，无需停止！！！')})
+                            'message': chencode('进程尚未创建，无需停止！！！')})
         else:
             if vdfilteror.stop():
                 vdfilteror = None
-                return jsonify({'status': 'Stop', 'message': vdfilteror.chencode('停止成功！')})
+                return jsonify({'status': 'Stop', 'message': chencode('停止成功！')})
             else:
                 vdfilteror = None
                 return jsonify({'status': 'Stop',
-                                'message': vdfilteror.chencode('出现异常，已强行停止，可能存在残留进程！')})
+                                'message': chencode('出现异常，已强行停止，可能存在残留进程！')})
     elif res['init']:
         if not isinstance(vdfilteror, Vdfilter):
             vdfilteror = Vdfilter(res)
             vdfilteror.start()
             if vdfilteror.is_alive():
                 return jsonify({'status': 'Initing',
-                                'message': vdfilteror.chencode('启动成功,正在初始化 ... ')})
+                                'message': chencode('启动成功,正在初始化 ... ')})
             else:
                 message = vdfilteror.message
                 vdfilteror.stop()
                 vdfilteror = None
                 return jsonify({'status': 'Stop',
-                                'message': vdfilteror.chencode('启动失败，请重试或检查后台进程！' + message[0])})
+                                'message': chencode('启动失败，请重试或检查后台进程！' + message[0])})
         else:
             return jsonify({'status': 'Initing',
-                            'message': vdfilteror.chencode('进程已创建，请勿重复创建，正在运行！若要切换视频，请首先停止当前进程！')})
+                            'message': chencode('进程已创建，请勿重复创建，正在运行！若要切换视频，请首先停止当前进程！')})
     else:
         if not isinstance(vdfilteror, Vdfilter):
             return jsonify({'status': 'Failed',
-                            'message': vdfilteror.chencode('进程尚未创建，在刷新前请先创建进程！')})
+                            'message': chencode('进程尚未创建，在刷新前请先创建进程！')})
         else:
             if vdfilteror.is_alive():
                 if vdfilteror.newfilter.streamcreater_start:
@@ -234,14 +234,14 @@ def vdfilter():
                         return resposedata
                     else:
                         return jsonify({'status': 'Pushing',
-                                        'message': vdfilteror.chencode('已开始推流，当前无最新的片段！！'),
+                                        'message': chencode('已开始推流，当前无最新的片段！！'),
                                         'Live address': str(vdfilteror.pushadress)})
                 else:
                     return jsonify({'status': 'Loading',
-                                    'message': vdfilteror.chencode('视频正在加载！！！')})
+                                    'message': chencode('视频正在加载！！！')})
             else:
                 return jsonify({'status': 'Termination',
-                                'message': vdfilteror.chencode('运行出错，后台已停止运行！！！')})
+                                'message': chencode('运行出错，后台已停止运行！！！')})
 
 
 def node_start():

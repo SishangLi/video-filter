@@ -24,10 +24,10 @@ class CutVideo(VideoFilter):
         use_shell = True if os.name == "nt" else False
         childcut = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     shell=use_shell)
-        while childcut.poll() != 0 and not self.global_ternimal_single:
+        while childcut.poll() != 0 and not self.global_ternimal_single[0]:
             time.sleep(0.1)
         else:
-            if self.global_ternimal_single:
+            if self.global_ternimal_single[0]:
                 childcut.communicate('q'.encode())
                 self.global_ternimal_carry[0] = True
                 while True:
