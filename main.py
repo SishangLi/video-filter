@@ -33,6 +33,8 @@ def watch_dog():
             else:
                 time.sleep(10)
                 vdfilteror = None
+        else:
+            time.sleep(10)
 
 
 def chencode(to_content):
@@ -257,7 +259,7 @@ if __name__ == "__main__":
     vdsource.start()
     wcdog = threading.Thread(target=watch_dog)
     wcdog.start()
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)
     print("Flask have started! Listening on 0.0.0.0:%d !" % port)
 
 

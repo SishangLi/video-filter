@@ -1,3 +1,4 @@
+import cv2
 import json
 import time
 import wave
@@ -278,12 +279,27 @@ class AutoSub(object):
 class AutoFilter(FetchStream):
     def __init__(self, channel, outpath, videopath, keywords, vdmode, faceimages):
         super(AutoFilter, self).__init__(channel, outpath, videopath, vdmode)
-        self.img_enlarge_times = 1 if self.vdmode == 'local' else 0
         self.keywords = keywords
         self.sub_creater = AutoSub()
+        self.img_enlarge_times = self.get_video_size(self.videopath) if self.vdmode == 'local' else 0
         self.face_recognizer = FR.Facedetection(faceimages, self.global_ternimal_single, self.img_enlarge_times)
         self.filedset = set()
         self.history = {}
+
+    @staticmethod
+    def get_video_size(video):
+        cap = cv2.VideoCapture(video)
+        count = 5
+        while count and not cap.isOpened():
+            cap = cv2.VideoCapture(video)
+            count -= 1  # 读五次
+            if not count and not cap.isOpened():
+                print('Read error !')
+                return
+        _, frame = cap.read()  # success：是否读取到帧 frame：截取到一帧图像，三维矩阵表示
+        size = frame.shape
+        large_time = 1 if size[0] * size[1] < 384000 else 0
+        return large_time
 
     def keyword_search(self, srcfilepath):
         _, subcontent = self.sub_creater(srcfilepath)
