@@ -7,6 +7,7 @@ VIDEOPATH = '../video/CCTV_News.mp4'
 
 
 class VideoFilter(object):
+    """过滤器基类"""
     def __init__(self, channel, outpath, vdmode):
         self.cutvideo_finish = False
         self.autofilter_finish = False
@@ -15,7 +16,7 @@ class VideoFilter(object):
         self.global_ternimal_single = [False]
         self.global_ternimal_carry = [False, False, False]
         self.freq = 10
-        self.delay = 10
+        self.delay = 2
         self.out_order_num = 0
         self.channel = channel
         self.outpath = outpath

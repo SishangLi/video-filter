@@ -12,6 +12,7 @@ class CutVideo(VideoFilter):
         else:
             pass
 
+    # 视频切割
     def cut_start(self):
         print("Process Cut have start ...")
         if not os.path.exists(self.videopath):
@@ -31,13 +32,17 @@ class CutVideo(VideoFilter):
                 childcut.communicate('q'.encode())
                 self.global_ternimal_carry[0] = True
                 while True:
-                    print("---------Cut capture the ternimal signal and wait for be terminated ...-------------")
+                    # print("---------Cut capture the ternimal signal and wait for be terminated ...-------------")
                     time.sleep(0.01)
             else:
                 self.cutvideo_finish = True
                 while not self.global_finish:
-                    print("------------------------Video cut has accomplished! Sleeping...---------------------")
+                    # print("------------------------Video cut has accomplished! Sleeping...---------------------")
                     time.sleep(1)
+                else:
+                    while True:
+                        # print("-Video cut has accomplished and wait for be terminated ...-")
+                        time.sleep(0.01)
 
 
 if __name__ == "__main__":

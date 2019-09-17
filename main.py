@@ -25,16 +25,18 @@ vdfilteror = None
 
 
 def watch_dog():
+    """看门狗，当视频正常播放完成后，用来自动清理后台"""
     global vdfilteror
     while True:
         if isinstance(vdfilteror, Vdfilter):
-            if not vdfilteror.newfilter.global_finish:
-                time.sleep(5)
-            else:
-                time.sleep(10)
+            if vdfilteror.finish_capture:
+                while not vdfilteror.clean():
+                    print("看门狗正在清理后台！")
                 vdfilteror = None
+            else:
+                time.sleep(5)
         else:
-            time.sleep(10)
+            time.sleep(5)
 
 
 def chencode(to_content):
@@ -61,16 +63,13 @@ class Vdfilter:
         self.init()
         self.chipsthumbnail_set = set()  # 用于记录已经传送完成的缩略图文件名
         self.chips_set = set()  # 用于记录已经传送完成的片段文件名
+        self.finish_capture = False
 
     def init(self):
-        if self.newfilter.vdmode == 'local':
-            self.vdsource = threading.Thread(target=self.newfilter.cut_start)
-            self.sub = threading.Thread(target=self.newfilter.filter_start)
-            self.publish = threading.Thread(target=self.newfilter.push)
-        else:
-            self.vdsource = threading.Thread(target=self.newfilter.fetch)
-            self.sub = threading.Thread(target=self.newfilter.filter_start)
-            self.publish = threading.Thread(target=self.newfilter.push_live)
+        self.vdsource = threading.Thread(target=self.newfilter.cut_start) if self.newfilter.vdmode == 'local' else \
+            threading.Thread(target=self.newfilter.fetch)
+        self.sub = threading.Thread(target=self.newfilter.filter_start)
+        self.publish = threading.Thread(target=self.newfilter.push)
 
     def start(self):
         self.vdsource.setDaemon(True)
@@ -100,6 +99,19 @@ class Vdfilter:
         while not (self.newfilter.global_ternimal_carry[0] and self.newfilter.global_ternimal_carry[1]
                    and self.newfilter.global_ternimal_carry[2]):
             time.sleep(0.01)
+        if self.publish.is_alive():
+            self._async_raise(self.publish.ident, SystemExit)
+            self.publish.join()
+        if self.sub.is_alive():
+            self._async_raise(self.sub.ident, SystemExit)
+            self.sub.join()
+        if self.vdsource.is_alive():
+            self._async_raise(self.vdsource.ident, SystemExit)
+            self.vdsource.join()
+        self.newfilter.clear_dir()
+        return not self.vdsource.is_alive() or self.sub.is_alive() or self.publish.is_alive()
+
+    def clean(self):
         if self.publish.is_alive():
             self._async_raise(self.publish.ident, SystemExit)
             self.publish.join()
@@ -230,17 +242,29 @@ def vdfilter():
                             'message': chencode('进程尚未创建，在刷新前请先创建进程！')})
         else:
             if vdfilteror.is_alive():
-                if vdfilteror.newfilter.streamcreater_start:
-                    resposedata = vdfilteror.get_chipsdata()
-                    if resposedata is not None:
-                        return resposedata
-                    else:
-                        return jsonify({'status': 'Pushing',
-                                        'message': chencode('已开始推流，当前无最新的片段！！'),
-                                        'Live address': str(vdfilteror.pushadress)})
+                if vdfilteror.newfilter.global_finish:
+                    vdfilteror.finish_capture = True
+                    return jsonify({'status': 'Ended',
+                                    'message': chencode('视频播放结束！！！'),
+                                    'Live-address': None})
                 else:
-                    return jsonify({'status': 'Loading',
-                                    'message': chencode('视频正在加载！！！')})
+                    if vdfilteror.newfilter.streamcreater_start:
+                        resposedata = vdfilteror.get_chipsdata()
+                        if resposedata is not None:
+                            return resposedata
+                        else:
+                            return jsonify({'status': 'Pushing',
+                                            'message': chencode('已开始推流，当前无最新的片段！！'),
+                                            'Live-address': str(vdfilteror.pushadress)})
+                    else:
+                        if vdfilteror.newfilter.delay:
+                            print('视频正在加载！！！')
+                            return jsonify({'status': 'Loading',
+                                            'message': chencode('视频正在加载！！！')})
+                        else:
+                            print('视频即将结束！！！')
+                            return jsonify({'status': 'Ending',
+                                            'message': chencode('视频即将结束！！！')})
             else:
                 return jsonify({'status': 'Termination',
                                 'message': chencode('运行出错，后台已停止运行！！！')})

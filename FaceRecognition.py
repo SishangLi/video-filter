@@ -70,6 +70,7 @@ def frame_time(time_ms):
 
 
 class FaceChipInfo:
+    """人脸片段信息类，包括片段信息和片段信息处理方法，待检测人脸每人一个"""
     def __init__(self, name):
         self.name = name
         self.reinit()
@@ -101,6 +102,7 @@ class FaceChipInfo:
 
 
 class Facedetection(object):
+    """人脸检测器，人脸检测器的函数和初始化函数等"""
     def __init__(self, faceimages, exit_signal, img_enlarge_times=0):
         self.current_time = 0
         self.frame_interval = 10
@@ -132,6 +134,7 @@ class Facedetection(object):
         :param frame:视频中的一帧
         :return:
         """
+        """二次开发中实现多人脸检测，矩阵运算"""
         _faces = detector(frame, self.img_enlarge_times)  # 使用detector检测器来检测图像中的人脸 ,1 表示将图片放大一倍
         frameface_feature = np.zeros(shape=(128, len(_faces)))
         for i, face in enumerate(_faces):
@@ -175,7 +178,7 @@ class Facedetection(object):
         success, frame = cap.read()  # success：是否读取到帧 frame：截取到一帧图像，三维矩阵表示
         while success:
             self.current_time = frame_time(int(cap.get(0)))  # 获取当前播放帧在视频中的时间
-            if self.exit_signal[0]:
+            if self.exit_signal[0]:  # 判断外部传入的信号，当有停止信号传入时，立即从任务中返回，不做任何处理
                 return []
             if frame_index % self.frame_interval == 0:  # 隔几帧取一次，加快执行速度
                 self.face_detected(frame)
@@ -183,7 +186,7 @@ class Facedetection(object):
             success, frame = cap.read()
         cap.release()  # Release everything if job is finished
 
-        for person in self.person_info:
+        for person in self.person_info:  # 人物信息处理工作，清理无效信息
             self.person_info[person].process_info()
             self.person_info[person].clear_invalid_data()
         return self.person_info

@@ -10,6 +10,7 @@ from CutVideo import CutVideo
 
 
 class FetchStream(CutVideo):
+    """直播抓取主类"""
     def __init__(self, channel, outpath, videourl, vdmode):
         super(FetchStream, self).__init__(channel, outpath, videourl, vdmode)
         if vdmode == 'live':
@@ -22,6 +23,7 @@ class FetchStream(CutVideo):
         else:
             pass
 
+    # 负责下载的函数
     def download_file(self, uri, outputdir, filename):
         """Download a ts video and save on the outputdir as the following file:
         outputdir/date_filename"""
@@ -34,13 +36,14 @@ class FetchStream(CutVideo):
         except Exception as ex:
             self.logger.error(ex)
 
+    # 下载任务控制函数，外部调用接口
     def fetch(self):
         """Fetch a HLS stream by periodically retrieving the m3u8 url for new
         playlist video files every freq seconds. For each segment that exists,
         it downloads them to the output directory as a TS video file."""
 
         print("Process fetch have start ...")
-        while not self.global_ternimal_single[0]:
+        while not self.global_ternimal_single[0]:  # 没有判断到全局终止信号就继续
             dynamicplaylist = m3u8.load(self.url)
             for videosegment in dynamicplaylist.segments:
                 videouri = videosegment.absolute_uri
@@ -53,7 +56,7 @@ class FetchStream(CutVideo):
         else:
             self.global_ternimal_carry[0] = True
             while True:
-                print("-----Fetch capture the ternimal signal and wait for be terminated ...-------")
+                # print("-----Fetch capture the ternimal signal and wait for be terminated ...-------")
                 time.sleep(0.01)
 
 

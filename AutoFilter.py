@@ -50,6 +50,7 @@ def which(program):
     return None
 
 
+# 从视频中提取音频
 def extract_audio(filepath, channels=1, rate=16000):
     if not os.path.isfile(filepath):
         print("The given file does not exist: {}".format(filepath))
@@ -68,6 +69,7 @@ def extract_audio(filepath, channels=1, rate=16000):
     return tempname, dirname
 
 
+# 声音检测中用到的函数，阈值判断
 def percentile(arr, percent):
     arr = sorted(arr)
     k = (len(arr) - 1) * percent
@@ -80,6 +82,7 @@ def percentile(arr, percent):
     return d0 + d1
 
 
+# 寻找音频中有话语的片段，并记录
 def find_speech_regions(filename, frame_width=4096, min_region_size=0.5, max_region_size=6):
     reader = wave.open(filename)
     sample_width = reader.getsampwidth()
@@ -110,6 +113,7 @@ def find_speech_regions(filename, frame_width=4096, min_region_size=0.5, max_reg
     return regions
 
 
+# 按照记录的有话语的时间戳将片段从音频中切出
 class WAVConverter(object):
     def __init__(self, include_before=0.25, include_after=0.25):
         self.source_path = None
@@ -123,8 +127,7 @@ class WAVConverter(object):
             start = max(0, start - self.include_before)
             end += self.include_after
             tempname = os.path.join(os.getcwd(), str(self.dirname), str(self.dirname) + str(num) + '.wav')
-            command = ["ffmpeg", "-ss", str(start), "-t", str(end - start),
-                       "-y", "-i", self.source_path,
+            command = ["ffmpeg", "-ss", str(start), "-t", str(end - start), "-y", "-i", self.source_path,
                        "-loglevel", "error", tempname]
             use_shell = True if os.name == "nt" else False
             subprocess.check_output(command, stdin=open(os.devnull), shell=use_shell)
@@ -133,6 +136,7 @@ class WAVConverter(object):
             return 1
 
 
+# 调用百度语音转录API进行语音识别并回传
 class SpeechRecognizer(object):
     def __init__(self, api_key, secret_key, rate, audioformat='wav', retries=3):
         self.api_key = api_key
@@ -224,6 +228,7 @@ class SpeechRecognizer(object):
         return 'Conversion failed'
 
 
+# 语音识别最高层的一个API
 class AutoSub(object):
     def __init__(self, _concurrency=10):
         self.subformat = 'srt'
@@ -276,6 +281,7 @@ class AutoSub(object):
         return dest, timed_subtitles
 
 
+# 自动过滤综合（最上层）API
 class AutoFilter(FetchStream):
     def __init__(self, channel, outpath, videopath, keywords, vdmode, faceimages):
         super(AutoFilter, self).__init__(channel, outpath, videopath, vdmode)
@@ -288,6 +294,7 @@ class AutoFilter(FetchStream):
 
     @staticmethod
     def get_video_size(video):
+        """本地视频获取视频大小，根据大小调整人脸识别中使用的分辨率，分辨率太大会耗时太多，影响时效性"""
         cap = cv2.VideoCapture(video)
         count = 5
         while count and not cap.isOpened():
@@ -299,9 +306,11 @@ class AutoFilter(FetchStream):
         _, frame = cap.read()  # success：是否读取到帧 frame：截取到一帧图像，三维矩阵表示
         size = frame.shape
         large_time = 1 if size[0] * size[1] < 384000 else 0
+        cap.release()
         return large_time
 
     def keyword_search(self, srcfilepath):
+        """调用语音识别API进行语音识别，并搜多关键词，若存在关键词返回相关信息"""
         _, subcontent = self.sub_creater(srcfilepath)
         chips = []
         for key_word in self.keywords:
@@ -315,6 +324,7 @@ class AutoFilter(FetchStream):
         return chips
 
     def keyface_search(self, srcfilepath):
+        """调用人脸识别API进行人脸检测，若存在关键人脸返回相关信息"""
         facecontent = self.face_recognizer.start(srcfilepath)
         chips = []
         for person in facecontent:
@@ -328,6 +338,7 @@ class AutoFilter(FetchStream):
         return chips
 
     def filter_save(self, filename):
+        """过滤器主函数，用来调用人脸和关键词过滤，并按回传的片段进行切割，存储到相关文件夹"""
         srcfilepath = os.path.join(self.get_outdir(), self.source_dir, filename)
         dstfilepath = os.path.join(self.get_outdir(), self.output_dir, filename) if self.vdmode == 'local' else \
             os.path.join(self.get_outdir(), self.output_dir,
@@ -371,6 +382,7 @@ class AutoFilter(FetchStream):
             shutil.move(srcfilepath, dstfilepath)
 
     def filter_start(self):
+        """过滤器控制函数，用来加载新的片段并启动过滤，监测全局开始和停止信号以及过滤任务（本地和直播两种模式）的判断"""
         print("Process autosub have start ...")
         # prewaiting
         wait = self.delay
@@ -399,12 +411,16 @@ class AutoFilter(FetchStream):
             if self.global_ternimal_single[0]:
                 self.global_ternimal_carry[1] = True
                 while True:
-                    print("-Sub capture the ternimal signal and wait for be terminated ...-")
+                    # print("-Sub capture the ternimal signal and wait for be terminated ...-")
                     time.sleep(0.01)
             else:
                 while not self.global_finish:
-                    print("-----------Video filter has accomplished! Sleeping...------------")
+                    # print("-----------Video filter has accomplished! Sleeping...------------")
                     time.sleep(1)
+                else:
+                    while True:
+                        # print("-Video filter has accomplished and wait for be terminated ...-")
+                        time.sleep(0.01)
 
 
 if __name__ == "__main__":
