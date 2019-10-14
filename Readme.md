@@ -18,7 +18,7 @@
 
 ### 文件结构
 
-.
+.  
 ├── AutoFilter.py                关键字过滤脚本  
 ├── CutVideo.py                视频切割脚本  
 ├── FaceRecognition.py    关键帧检测脚本  
