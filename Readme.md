@@ -8,7 +8,7 @@
 
 ### 环境配置
 
-1. 本系统基于python，人脸检测使用dlib库，需要使用GPU加速，需要预先配置CUDA环境
+1. 本系统基于python，人脸检测使用dlib库，需要使用GPU加速，需要预先[配置CUDA环境](#配置CUDA环境)
 
 2. 建立 python3.5+ 虚拟环境 ```conda create -n videosearch python=3.7```
 
@@ -18,7 +18,24 @@
 
 ### 文件结构
 
+.
+├── AutoFilter.py                关键字过滤脚本
+├── CutVideo.py                视频切割脚本
+├── FaceRecognition.py    关键帧检测脚本
+├── FetchStream.py          直播流抓取脚本
+├── __init__.py
+├── main.py                       主函数
+├── Node-Media-Server    推流服务
+├── Stream.py                   推流脚本
+├── utils                             辅助函数
+└── video                           视频库
+
 ### 附录
+
+##### 配置CUDA环境
+
+- 下载适合机器的CUDA10.0和Cudnn包（deb包）
+- sudo dpkg -i xxx.deb
 
 ##### 安装GPU-dlib
 
