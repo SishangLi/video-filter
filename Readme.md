@@ -19,16 +19,16 @@
 ### 文件结构
 
 .
-├── AutoFilter.py                关键字过滤脚本
-├── CutVideo.py                视频切割脚本
-├── FaceRecognition.py    关键帧检测脚本
-├── FetchStream.py          直播流抓取脚本
-├── __init__.py
-├── main.py                       主函数
-├── Node-Media-Server    推流服务
-├── Stream.py                   推流脚本
-├── utils                             辅助函数
-└── video                           视频库
+├── AutoFilter.py                关键字过滤脚本  
+├── CutVideo.py                视频切割脚本  
+├── FaceRecognition.py    关键帧检测脚本  
+├── FetchStream.py          直播流抓取脚本  
+├── __init__.py  
+├── main.py                       主函数  
+├── Node-Media-Server    推流服务  
+├── Stream.py                   推流脚本  
+├── utils                             辅助函数  
+└── video                           视频库   
 
 ### 附录
 
