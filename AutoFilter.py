@@ -384,12 +384,6 @@ class AutoFilter(FetchStream):
     def filter_start(self):
         """过滤器控制函数，用来加载新的片段并启动过滤，监测全局开始和停止信号以及过滤任务（本地和直播两种模式）的判断"""
         print("Process autosub have start ...")
-        # prewaiting
-        wait = self.delay
-        while wait:
-            time.sleep(1)
-            wait -= 2
-            print('Stream chips are initing, Filter waiting ... ...')
         while not (self.global_ternimal_single[0] or self.autofilter_finish):
             while self.vdmode == 'local' and not os.path.exists(self.m3u8path):
                 time.sleep(2)
@@ -425,7 +419,7 @@ class AutoFilter(FetchStream):
 
 if __name__ == "__main__":
     autofilter = AutoFilter('cctv1hd', 'None', 'http://tv6.ustc.edu.cn/hls/cctv1hd.m3u8',
-                            '习近平', 'live', 'filsave', None)
+                            '习近平', 'live', None)
     autofilter.filter_start()
 
 # def filter(self, filename):
