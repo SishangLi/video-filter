@@ -14,11 +14,11 @@
 
 3. 安装依赖 ```pip install -r requirements.txt```
 
-4. [安装 GPU-dlib](安装 GPU-dlib)
+4. [安装 GPU-dlib]()
 
 ### 文件结构
 
-### [附录]()
+### 附录
 
 ##### 安装 GPU-dlib
 
