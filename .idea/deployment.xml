@@ -2,7 +2,35 @@
 <project version="4">
   <component name="PublishConfigData" autoUpload="Always" serverName="lps">
     <serverData>
-      <paths name="Svr101">
+      <paths name="Svr109">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="Svr111">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="Svr113">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="Svr116">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="Svr118">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -16,21 +44,24 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="lps">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/home/lisishang/workspace/project/video-filter" local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="svr113">
+      <paths name="Svr123">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="ubuntu18.04">
+      <paths name="lps">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/lisishang/workspace/project/video-filter" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/Release_V1" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="svr101">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
