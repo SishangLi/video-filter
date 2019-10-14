@@ -14,13 +14,13 @@
 
 3. 安装依赖 ```pip install -r requirements.txt```
 
-4. [安装 GPU-dlib]()
+4. [安装 GPU-dlib](#GPU-dlib)
 
 ### 文件结构
 
 ### 附录
 
-##### 安装 GPU-dlib
+##### GPU-dlib
 
 1. 配置好Cuda10.0、Cudnn 环境，并将路径添加到~/.bashrc中，如下：
 
