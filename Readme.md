@@ -10,15 +10,15 @@
 
 1. 本系统基于python，人脸检测使用dlib库，需要使用GPU加速，需要预先配置CUDA环境
 
-2. 建立 python3.5+ 虚拟环境
+2. 建立 python3.5+ 虚拟环境 ```conda create -n videosearch python=3.7```
 
 3. 安装依赖 ```pip install -r requirements.txt```
 
-4. 安装 [GPU-dlib](#安装 GPU-dlib)
+4. [安装 GPU-dlib](#安装 GPU-dlib)
 
 ### 文件结构
 
-### 附录
+### [附录]()
 
 ##### 安装 GPU-dlib
 
