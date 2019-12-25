@@ -78,7 +78,6 @@ class VideoFilter(object):
         shutil.rmtree(self.output_dir)
 
 
-
 class Chip:
     def __init__(self, video_source):
         self.source = video_source
@@ -125,7 +124,6 @@ def filewrite(_filename, _cache, way='w'):
 if __name__ == "__main__":
     # channel = (URL.split('/')[-1])[:-5]  # live
     channel = (os.path.split(VIDEOPATH)[-1])[:-4]  # local
-
 
 
 # tempfile3 = os.path.join(os.getcwd(), str(tempdir), "padding.ts")
